@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Кликер</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {width: 800px;}
+        #score { font-size: 44px; font-weight: bold; text-align: center; margin: 6px 0; }
+        #info  { text-align: center; font-size: 12px; color: #888; margin-bottom: 16px; }
+        #main-btn { display: block; width: 140px; height: 44px; margin: 0 auto 20px; font-size: 16px; font-weight: bold; }
+        .upgrades { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .upg small { display: block; font-size: 11px; color: #888; margin: 3px 0 8px; }
+        .upg button { width: 100%; }
+        .lvl { text-align: right; font-size: 10px; color: #bbb; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Кликер</h1>
+    <div id="score">0</div>
+    <div id="info">клик: +1 | авто: 0/сек</div>
+    <button id="main-btn" onclick="handleClick()">ЖМИ</button>
+    <div class="upgrades">
+        <div class="upg card">
+            <b>Усиление</b>
+            <small>+1 за клик<br>Цена: <span id="c1">10</span></small>
+            <button id="b1" onclick="buy('click')">Купить</button>
+            <div class="lvl">ур. <span id="l1">0</span></div>
+        </div>
+        <div class="upg card">
+            <b>Мега</b>
+            <small>+10 за клик<br>Цена: <span id="c2">100</span></small>
+            <button id="b2" onclick="buy('mega')">Купить</button>
+            <div class="lvl">ур. <span id="l2">0</span></div>
+        </div>
+        <div class="upg card">
+            <b>Авто</b>
+            <small>+1/сек<br>Цена: <span id="c4">100</span></small>
+            <button id="b4" onclick="buy('auto')">Купить</button>
+            <div class="lvl">ур. <span id="l4">0</span></div>
+        </div>
+    </div>
+    <script>
+        let score = 0, clickPower = 1, autoRate = 0;
+
+        const upg = {
+            click: { lvl: 0, cost: 10,  step: 15,  bonus: 1,  click: true,  ci: 'c1', bi: 'b1', li: 'l1' },
+            mega:  { lvl: 0, cost: 100, step: 50,  bonus: 10, click: true,  ci: 'c2', bi: 'b2', li: 'l2' },
+            auto:  { lvl: 0, cost: 100, step: 100, bonus: 1,  click: false, ci: 'c4', bi: 'b4', li: 'l4' },
+        };
+
+        const get = id => document.getElementById(id);
+        const handleClick = () => { score += clickPower; update(); };
+
+        const buy = key => {
+            const u = upg[key];
+            if (score < u.cost) return;
+            score -= u.cost;
+            u.cost += u.step;
+            u.lvl++;
+            u.click ? clickPower += u.bonus : autoRate += u.bonus;
+            update();
+        };
+
+        const update = () => {
+            get('score').textContent = score.toLocaleString('ru');
+            get('info').textContent = `клик: +${clickPower} | авто: ${autoRate}/сек`;
+            Object.values(upg).forEach(u => {
+                get(u.ci).textContent = u.cost.toLocaleString('ru');
+                get(u.li).textContent = u.lvl;
+                get(u.bi).disabled = score < u.cost;
+            });
+        };
+
+        setInterval(() => { if (autoRate > 0) { score += autoRate; update(); } }, 1000);
+        update();
+    </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Шарики</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {width: 500px;}
+        #info { text-align: center; font-size: 12px; color: #888; margin-bottom: 8px; }
+        #field {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .ball { position: absolute; border-radius: 50%; cursor: pointer; transition: background 0.1s; }
+    </style>
+</head>
+<body>
+    <h1>Шарики</h1>
+    <div id="info">❤️ <span id="hp">5</span> &nbsp;|&nbsp; Очки: <span id="score">0</span></div>
+    <div id="field"></div>
+    <script>
+        let hp = 5, score = 0, speedMult = 1;
+        setInterval(() => { speedMult += 0.15; }, 5000);
+
+        const field = document.getElementById('field');
+        const hpEl = document.getElementById('hp');
+        const scoreEl = document.getElementById('score');
+        const colors = ['#4caf50', '#ffc107', '#ff5722', '#e53935'];
+
+        const spawnBall = () => {
+            const hits = Math.random() < 0.5 ? 1 : (Math.random() < 0.5 ? 2 : 3);
+            const r = 16 + hits * 5;
+            const x = Math.random() * (field.clientWidth - r * 2) + r;
+            const speed = 1.8 + Math.random() * 1.2;
+
+            const el = document.createElement('div');
+            el.className = 'ball';
+            el.style.cssText = `width:${r*2}px;height:${r*2}px;left:${x-r}px;top:${-r*2}px;background:${hits === 1 ? colors[3] : colors[0]}`;
+
+            let hitsLeft = hits, top = -r * 2;
+
+            el.onclick = () => {
+                if (--hitsLeft <= 0) { el.remove(); scoreEl.textContent = ++score; }
+                else el.style.background = colors[hits - hitsLeft];
+            };
+
+            field.appendChild(el);
+
+            const move = () => {
+                if (!el.isConnected) return;
+                top += speed * speedMult;
+                el.style.top = top + 'px';
+                if (top > field.clientHeight) {
+                    el.remove();
+                    hpEl.textContent = --hp;
+                    if (hp <= 0) {
+                        field.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:bold;">Игра окончена! Очки: ${score}</div>`;
+                        clearInterval(spawner);
+                    }
+                    return;
+                }
+                requestAnimationFrame(move);
+            };
+            requestAnimationFrame(move);
+        };
+
+        const spawner = setInterval(spawnBall, 1200);
+        spawnBall();
+    </script>
+</body>
+</html>
